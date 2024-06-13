@@ -58,8 +58,11 @@ if st.button("Calculate"):
     
     st.markdown(result_html, unsafe_allow_html=True)
 
+    # Add some space above the graph
+    st.markdown("<br><br>", unsafe_allow_html=True)
+
     # Plot the graph
-    years = list(range(time_period, time_period + 10))
+    years = list(range(1, time_period + 10))
     plt.figure(figsize=(10, 6))
     plt.plot(years, future_values, marker='o', linestyle='-', color='b', label='Future Value')
     plt.xlabel('Years')
