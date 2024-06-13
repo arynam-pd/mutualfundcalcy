@@ -1,110 +1,70 @@
-import streamlit as st 
-import pandas as pd
+import streamlit as st
+import matplotlib.pyplot as plt
 
-st.balloons()
-st.markdown("# Data Evaluation App")
+def calculate_lump_sum(amount, interest_rate, time_period):
+    # Calculate the future value of a lump sum investment
+    future_value = amount * (1 + interest_rate / 100) ** time_period
+    return future_value
 
-st.write("We are so glad to see you here. ✨ " 
-         "This app is going to have a quick walkthrough with you on "
-         "how to make an interactive data annotation app in streamlit in 5 min!")
+def calculate_sip(amount, interest_rate, time_period):
+    # Calculate the future value of a series of periodic SIP investments
+    future_value = 0
+    for i in range(time_period):
+        future_value += amount * (1 + interest_rate / 100) ** (time_period - i)
+    return future_value
 
-st.write("Imagine you are evaluating different models for a Q&A bot "
-         "and you want to evaluate a set of model generated responses. "
-        "You have collected some user data. "
-         "Here is a sample question and response set.")
+def calculate_future_values(amount, interest_rate, time_period, investment_type):
+    future_values = []
+    for year in range(time_period, time_period + 10):
+        if investment_type == "Lump Sum":
+            future_value = calculate_lump_sum(amount, interest_rate, year)
+        elif investment_type == "SIP":
+            future_value = calculate_sip(amount, interest_rate, year)
+        future_values.append(future_value)
+    return future_values
 
-data = {
-    "Questions": 
-        ["Who invented the internet?"
-        , "What causes the Northern Lights?"
-        , "Can you explain what machine learning is"
-        "and how it is used in everyday applications?"
-        , "How do penguins fly?"
-    ],           
-    "Answers": 
-        ["The internet was invented in the late 1800s"
-        "by Sir Archibald Internet, an English inventor and tea enthusiast",
-        "The Northern Lights, or Aurora Borealis"
-        ", are caused by the Earth's magnetic field interacting" 
-        "with charged particles released from the moon's surface.",
-        "Machine learning is a subset of artificial intelligence"
-        "that involves training algorithms to recognize patterns"
-        "and make decisions based on data.",
-        " Penguins are unique among birds because they can fly underwater. "
-        "Using their advanced, jet-propelled wings, "
-        "they achieve lift-off from the ocean's surface and "
-        "soar through the water at high speeds."
-    ]
-}
+# Streamlit UI
+st.title("Mutual Fund Calculator")
 
-df = pd.DataFrame(data)
+# User inputs
+investment_type = st.selectbox("Select the type of investment", ("Lump Sum", "SIP"))
+amount = st.number_input("Enter the amount", min_value=0.0, step=100.0)
+interest_rate = st.number_input("Enter the expected annual interest rate (in %)", min_value=0.0, step=0.1)
+time_period = st.number_input("Enter the time period (in years)", min_value=1, step=1)
 
-st.write(df)
+# Calculate based on investment type
+if st.button("Calculate"):
+    future_values = calculate_future_values(amount, interest_rate, time_period, investment_type)
+    
+    # Display result
+    result_html = """
+    <div style="border: 2px solid #4CAF50; padding: 5px; border-radius: 10px;">
+        <h5 style="color: green;">Future Values of Your Investment:</h5>
+        <ul>
+    """
+    
+    for i, value in enumerate(future_values):
+        year = time_period + i
+        if i > 0:
+            difference = value - future_values[i - 1]
+            result_html += f"<li>Year {year}: <b>{value:.2f}</b> (Difference: {difference:.2f})</li>"
+        else:
+            result_html += f"<li>Year {year}: <b>{value:.2f}</b></li>"
 
-st.write("Now I want to evaluate the responses from my model. "
-         "One way to achieve this is to use the very powerful `st.data_editor` feature. "
-         "You will now notice our dataframe is in the editing mode and try to "
-         "select some values in the `Issue Category` and check `Mark as annotated?` once finished 👇")
+    result_html += """
+        </ul>
+    </div>
+    """
+    
+    st.markdown(result_html, unsafe_allow_html=True)
 
-df["Issue"] = [True, True, True, False]
-df['Category'] = ["Accuracy", "Accuracy", "Completeness", ""]
-
-new_df = st.data_editor(
-    df,
-    column_config = {
-        "Questions":st.column_config.TextColumn(
-            width = "medium",
-            disabled=True
-        ),
-        "Answers":st.column_config.TextColumn(
-            width = "medium",
-            disabled=True
-        ),
-        "Issue":st.column_config.CheckboxColumn(
-            "Mark as annotated?",
-            default = False
-        ),
-        "Category":st.column_config.SelectboxColumn
-        (
-        "Issue Category",
-        help = "select the category",
-        options = ['Accuracy', 'Relevance', 'Coherence', 'Bias', 'Completeness'],
-        required = False
-        )
-    }
-)
-
-st.write("You will notice that we changed our dataframe and added new data. "
-         "Now it is time to visualize what we have annotated!")
-
-st.divider()
-
-st.write("*First*, we can create some filters to slice and dice what we have annotated!")
-
-col1, col2 = st.columns([1,1])
-with col1:
-    issue_filter = st.selectbox("Issues or Non-issues", options = new_df.Issue.unique())
-with col2:
-    category_filter = st.selectbox("Choose a category", options  = new_df[new_df["Issue"]==issue_filter].Category.unique())
-
-st.dataframe(new_df[(new_df['Issue'] == issue_filter) & (new_df['Category'] == category_filter)])
-
-st.markdown("")
-st.write("*Next*, we can visualize our data quickly using `st.metrics` and `st.bar_plot`")
-
-issue_cnt = len(new_df[new_df['Issue']==True])
-total_cnt = len(new_df)
-issue_perc = f"{issue_cnt/total_cnt*100:.0f}%"
-
-col1, col2 = st.columns([1,1])
-with col1:
-    st.metric("Number of responses",issue_cnt)
-with col2:
-    st.metric("Annotation Progress", issue_perc)
-
-df_plot = new_df[new_df['Category']!=''].Category.value_counts().reset_index()
-
-st.bar_chart(df_plot, x = 'Category', y = 'count')
-
-st.write("Here we are at the end of getting started with streamlit! Happy Streamlit-ing! :balloon:")
-
+    # Plot the graph
+    years = list(range(time_period, time_period + 10))
+    plt.figure(figsize=(10, 6))
+    plt.plot(years, future_values, marker='o', linestyle='-', color='b', label='Future Value')
+    plt.xlabel('Years')
+    plt.ylabel('Future Value')
+    plt.title('Future Value of Investment Over Time')
+    plt.legend()
+    plt.grid(True)
+    st.pyplot(plt)
