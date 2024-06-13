@@ -9,27 +9,20 @@ def calculate_lump_sum(amount, interest_rate, time_period):
 def calculate_sip(amount, interest_rate, time_period):
     # Calculate the future value of a series of periodic SIP investments
     monthly_rate = (interest_rate / 100) / 12
-    future_values = []
-    invested_amount = 0
+    future_value = 0
     for i in range(time_period * 12):
-        invested_amount += amount
-        future_value = invested_amount * (1 + monthly_rate) ** (time_period * 12 - i)
-        future_values.append(future_value)
-    return future_values, invested_amount
+        future_value += amount * (1 + monthly_rate) ** (time_period * 12 - i)
+    return future_value
 
 def calculate_future_values(amount, interest_rate, investment_type, start_period, end_period):
     future_values = []
-    invested_amount = 0
-    
     for year in range(start_period, end_period + 1):
         if investment_type == "Lump Sum":
             future_value = calculate_lump_sum(amount, interest_rate, year)
-            future_values.append(future_value)
         elif investment_type == "SIP":
-            future_values, invested_amount = calculate_sip(amount, interest_rate, year)
-            break  # Only need to calculate invested amount once for SIP
-
-    return future_values, invested_amount
+            future_value = calculate_sip(amount, interest_rate, year)
+        future_values.append(future_value)
+    return future_values
 
 # Streamlit UI
 st.title("Mutual Fund Calculator")
@@ -42,8 +35,8 @@ time_period = st.number_input("Enter the time period (in years)", min_value=1, s
 
 # Calculate based on investment type
 if st.button("Calculate"):
-    # Calculate future values and optionally invested amount for SIP
-    future_values, invested_amount = calculate_future_values(amount, interest_rate, investment_type, 1, time_period + 10)
+    # Calculate future values from 1 to the end period
+    future_values = calculate_future_values(amount, interest_rate, investment_type, 1, time_period + 10)
     
     # Display result for the specified period to next 10 years
     result_html = """
@@ -52,16 +45,13 @@ if st.button("Calculate"):
         <ul>
     """
     
-    if investment_type == "SIP":
-        result_html += f"<li>Invested Amount (total up to year {time_period}): <b>{invested_amount:.2f}</b></li>"
-    
     for i, value in enumerate(future_values[time_period-1:time_period + 10]):
         year = time_period + i
-        difference = value - invested_amount
         if i > 0:
-            result_html += f"<li>Year {year}: <b>Future Value: {value:.2f}</b> | <b>Difference: {difference:.2f}</b></li>"
+            difference = value - future_values[time_period - 1 + i - 1]
+            result_html += f"<li>Year {year}: <b>{value:.2f}</b> (Difference: {difference:.2f})</li>"
         else:
-            result_html += f"<li>Year {year}: <b>Future Value: {value:.2f}</b></li>"
+            result_html += f"<li>Year {year}: <b>{value:.2f}</b></li>"
 
     result_html += """
         </ul>
