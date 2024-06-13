@@ -18,13 +18,14 @@ def calculate_sip(amount, interest_rate, time_period):
 
 def calculate_future_values(amount, interest_rate, investment_type, start_period, end_period):
     future_values = []
+    invested_amount = 0
     for year in range(start_period, end_period + 1):
         if investment_type == "Lump Sum":
             future_value = calculate_lump_sum(amount, interest_rate, year)
         elif investment_type == "SIP":
-            future_value = calculate_sip(amount, interest_rate, year)
+            future_value, invested_amount = calculate_sip(amount, interest_rate, year)
         future_values.append(future_value)
-    return future_values
+    return future_values, invested_amount
 
 # Streamlit UI
 st.title("Mutual Fund Calculator")
