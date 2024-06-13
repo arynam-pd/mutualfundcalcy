@@ -44,7 +44,7 @@ if st.button("Calculate"):
     """
     
     for i, value in enumerate(future_values):
-        year = 1 + i
+        year = time_period + i
         if i > 0:
             difference = value - future_values[i - 1]
             result_html += f"<li>Year {year}: <b>{value:.2f}</b> (Difference: {difference:.2f})</li>"
