@@ -48,7 +48,7 @@ if st.button("Calculate"):
         <ul>
     """
     if investment_type == "SIP":
-        result_html += f"<li>Invested Amount up to {time_period} year: <b>{invested_amount:.2f}</b></li>"
+        result_html += f"<li>Invested amount up to {time_period} years: <b>{invested_amount:.2f}</b></li>"
         
     for i, value in enumerate(future_values[time_period-1:time_period + 10]):
         year = time_period + i
