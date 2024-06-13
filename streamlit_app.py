@@ -41,6 +41,12 @@ if st.button("Calculate"):
     # Calculate future values from 1 to the end period
     future_values, invested_amount = calculate_future_values(amount, interest_rate, investment_type, 1, time_period + 10)
     
+    # Calculate the return up to user input time period
+    if investment_type == "SIP":
+        return_up_to_time_period = future_values[time_period - 1] - invested_amount
+    else:
+        return_up_to_time_period = future_values[time_period - 1] - amount  # For Lump Sum
+    
     # Display result for the specified period to next 10 years
     result_html = """
     <div style="border: 2px solid #4CAF50; padding: 5px; border-radius: 10px;">
@@ -49,12 +55,13 @@ if st.button("Calculate"):
     """
     if investment_type == "SIP":
         result_html += f"<li>Invested amount up to {time_period} years: <b>{invested_amount:.2f}</b></li>"
+        result_html += f"<li>Return up to {time_period} years: <b>{return_up_to_time_period:.2f}</b></li>"
         
     for i, value in enumerate(future_values[time_period-1:time_period + 10]):
         year = time_period + i
         if i > 0:
             difference = value - future_values[time_period - 1 + i - 1]
-            result_html += f"<li>Year {year}: <b>{value:.2f}</b> (Difference: {difference:.2f})</li>"
+            result_html += f"<li>Year {year}: <b>{value:.2f}</b> (Yearly Returns: {difference:.2f})</li>"
         else:
             result_html += f"<li>Year {year}: <b>{value:.2f}</b></li>"
 
