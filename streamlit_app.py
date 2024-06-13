@@ -15,7 +15,7 @@ def calculate_sip(amount, interest_rate, time_period):
 
 def calculate_future_values(amount, interest_rate, time_period, investment_type):
     future_values = []
-    for year in range(time_period, time_period + 10):
+    for year in range(1, time_period + 10):
         if investment_type == "Lump Sum":
             future_value = calculate_lump_sum(amount, interest_rate, year)
         elif investment_type == "SIP":
@@ -44,7 +44,7 @@ if st.button("Calculate"):
     """
     
     for i, value in enumerate(future_values):
-        year = time_period + i
+        year = 1 + i
         if i > 0:
             difference = value - future_values[i - 1]
             result_html += f"<li>Year {year}: <b>{value:.2f}</b> (Difference: {difference:.2f})</li>"
@@ -62,7 +62,7 @@ if st.button("Calculate"):
     st.markdown("<br><br>", unsafe_allow_html=True)
 
     # Plot the graph
-    years = list(range(time_period, time_period + 10))
+    years = list(range(1, time_period + 10))
     plt.figure(figsize=(10, 6))
     plt.plot(years, future_values, marker='o', linestyle='-', color='b', label='Future Value')
     plt.xlabel('Years')
