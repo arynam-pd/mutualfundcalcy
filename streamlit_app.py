@@ -8,9 +8,10 @@ def calculate_lump_sum(amount, interest_rate, time_period):
 
 def calculate_sip(amount, interest_rate, time_period):
     # Calculate the future value of a series of periodic SIP investments
+    monthly_rate = (interest_rate / 100) / 12
     future_value = 0
-    for i in range(time_period):
-        future_value += amount * (1 + interest_rate / 100) ** (time_period - i)
+    for i in range(time_period * 12):
+        future_value += amount * (1 + monthly_rate) ** (time_period * 12 - i)
     return future_value
 
 def calculate_future_values(amount, interest_rate, investment_type, start_period, end_period):
