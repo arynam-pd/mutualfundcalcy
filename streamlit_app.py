@@ -10,9 +10,11 @@ def calculate_sip(amount, interest_rate, time_period):
     # Calculate the future value of a series of periodic SIP investments
     monthly_rate = (interest_rate / 100) / 12
     future_value = 0
+    invested_amount = 0
     for i in range(time_period * 12):
+        invested_amount += amount
         future_value += amount * (1 + monthly_rate) ** (time_period * 12 - i)
-    return future_value
+    return future_value, invested_amount
 
 def calculate_future_values(amount, interest_rate, investment_type, start_period, end_period):
     future_values = []
