@@ -13,9 +13,9 @@ def calculate_sip(amount, interest_rate, time_period):
         future_value += amount * (1 + interest_rate / 100) ** (time_period - i)
     return future_value
 
-def calculate_future_values(amount, interest_rate, time_period, investment_type):
+def calculate_future_values(amount, interest_rate, investment_type, start_period, end_period):
     future_values = []
-    for year in range(time_period, time_period + 10):
+    for year in range(start_period, end_period + 1):
         if investment_type == "Lump Sum":
             future_value = calculate_lump_sum(amount, interest_rate, year)
         elif investment_type == "SIP":
@@ -34,19 +34,20 @@ time_period = st.number_input("Enter the time period (in years)", min_value=1, s
 
 # Calculate based on investment type
 if st.button("Calculate"):
-    future_values = calculate_future_values(amount, interest_rate, time_period, investment_type)
+    # Calculate future values from 1 to the end period
+    future_values = calculate_future_values(amount, interest_rate, investment_type, 1, time_period + 10)
     
-    # Display result
+    # Display result for the specified period to next 10 years
     result_html = """
     <div style="border: 2px solid #4CAF50; padding: 5px; border-radius: 10px;">
         <h5 style="color: green;">Future Values of Your Investment:</h5>
         <ul>
     """
     
-    for i, value in enumerate(future_values):
+    for i, value in enumerate(future_values[time_period-1:time_period + 10]):
         year = time_period + i
         if i > 0:
-            difference = value - future_values[i - 1]
+            difference = value - future_values[time_period - 1 + i - 1]
             result_html += f"<li>Year {year}: <b>{value:.2f}</b> (Difference: {difference:.2f})</li>"
         else:
             result_html += f"<li>Year {year}: <b>{value:.2f}</b></li>"
@@ -61,8 +62,8 @@ if st.button("Calculate"):
     # Add some space above the graph
     st.markdown("<br><br>", unsafe_allow_html=True)
 
-    # Plot the graph
-    years = list(range(time_period, time_period + 10))
+    # Plot the graph from year 1 to end period
+    years = list(range(1, time_period + 11))
     plt.figure(figsize=(10, 6))
     plt.plot(years, future_values, marker='o', linestyle='-', color='b', label='Future Value')
     plt.xlabel('Years')
